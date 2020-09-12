@@ -14,7 +14,8 @@ try:
     from django.utils.six import string_types
 except ImportError:
     # For Django < 1.4.2
-    string_types = basestring,
+    #string_types = basestring,
+    pass
 
 import re
 import warnings
@@ -45,11 +46,13 @@ def get_menu(context, request):
         template_response = get_admin_site(request.current_app).index(request)
     else:
         try:
-            template_response = get_admin_site(context.current_app).index(request)
-        # Django 1.10 removed the current_app parameter for some classes and functions. 
+            template_response = get_admin_site(
+                context.current_app).index(request)
+        # Django 1.10 removed the current_app parameter for some classes and functions.
         # Check the release notes.
         except AttributeError:
-            template_response = get_admin_site(context.request.resolver_match.namespace).index(request)
+            template_response = get_admin_site(
+                context.request.resolver_match.namespace).index(request)
 
     try:
         app_list = template_response.context_data['app_list']
@@ -100,7 +103,8 @@ class Menu(object):
             self.ctx_model_plural = None
 
         # Flatten all models from native apps
-        self.all_models = [model for app in app_list for model in app['models']]
+        self.all_models = [
+            model for app in app_list for model in app['models']]
 
         # Init config variables
         self.init_config()
@@ -191,10 +195,9 @@ class Menu(object):
 
         return app
 
-
     def app_is_forbidden(self, app):
         return app['permissions'] and \
-               not self.user_has_permission(app['permissions'])
+            not self.user_has_permission(app['permissions'])
 
     def app_is_excluded(self, app):
         return self.conf_exclude and app['name'] in self.conf_exclude
@@ -207,7 +210,7 @@ class Menu(object):
         if 'icon' in app:
             app['icon'] = app['icon'] or 'icon-'
         elif self.conf_icons and 'name' in app and \
-                        app['name'] in self.conf_icons:
+                app['name'] in self.conf_icons:
             app['icon'] = self.conf_icons[app['name']]
 
     def process_semi_native_app(self, app):
@@ -289,11 +292,11 @@ class Menu(object):
             model = self.make_model(model_def, app_name)
             return [model] if model else []
         prefix = match.group(1)
-        prefix = self.get_model_name(app_name,prefix)
+        prefix = self.get_model_name(app_name, prefix)
         return [
             m
             for m in [
-                self.convert_native_model(native_model,app_name)
+                self.convert_native_model(native_model, app_name)
                 for native_model in self.all_models
                 if self.get_native_model_name(native_model).startswith(prefix)
             ]
@@ -348,8 +351,8 @@ class Menu(object):
             'url': self.get_native_model_url(model),
             'name': self.get_native_model_name(model),
             'app': app_name,
-            'perms': model.get('perms',None),
-            'add_url': model.get('add_url',None),
+            'perms': model.get('perms', None),
+            'add_url': model.get('add_url', None),
         }
 
     def get_native_model_url(self, model):
@@ -379,7 +382,7 @@ class Menu(object):
 
     def model_is_forbidden(self, model):
         return model['permissions'] and \
-               not self.user_has_permission(model['permissions'])
+            not self.user_has_permission(model['permissions'])
 
     def process_semi_native_model(self, model, app_name):
         """
